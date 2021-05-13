@@ -21,8 +21,6 @@ xml_path = root_path + "xml/utf8/"
 SAMPLE_RATE = 16000
 
 
-
-
 def parse_xml(file_name):
     phrases = []
     root = ET.parse(xml_path + file_name).getroot()
@@ -31,18 +29,18 @@ def parse_xml(file_name):
         uetterance = ""
 
         for element in segment.findall(".//element"):
-            uetterance+=(element.text + " ")
+            uetterance += (element.text + " ")
 
         uetterance = uetterance[:-1]
         with localcontext() as ctx:
             ctx.rounding = ROUND_HALF_UP
             offset_frame = SAMPLE_RATE * (Decimal(segment.get("starttime")).to_integral_value())
             nums_frame = SAMPLE_RATE * (Decimal(segment.get("endtime")).to_integral_value()) - offset_frame
-        file_name = file_name[:len(file_name)-4]
-        phrases.append({file_name:{"offset_frame": int(offset_frame), "nums_frame": int(nums_frame),
-                         "uetterance": uetterance}})
-    return  phrases
+        phrases.append({"offset_frame": int(offset_frame), "nums_frame": int(nums_frame),
+                        "uetterance": uetterance})
 
+    file_name = file_name[:len(file_name) - 4]
+    return {file_name: phrases}
 
 def construct_dataset():
     pass
