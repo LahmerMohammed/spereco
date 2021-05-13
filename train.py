@@ -33,14 +33,14 @@ def parse_xml(file_name):
         for element in segment.findall(".//element"):
             uetterance+=(element.text + " ")
 
-        phrase = phrase[:-1]
+        uetterance = uetterance[:-1]
         with localcontext() as ctx:
             ctx.rounding = ROUND_HALF_UP
             offset_frame = SAMPLE_RATE * (Decimal(segment.get("starttime")).to_integral_value())
             nums_frame = SAMPLE_RATE * (Decimal(segment.get("endtime")).to_integral_value()) - offset_frame
-
-        phrases.append({"offset_frame": int(offset_frame) , "nums_frame": int(nums_frame) ,
-                        "uetterance": uetterance})
+        file_name = file_name[:len(file_name)-4]
+        phrases.append({file_name:{"offset_frame": int(offset_frame), "nums_frame": int(nums_frame),
+                         "uetterance": uetterance}})
     return  phrases
 
 
