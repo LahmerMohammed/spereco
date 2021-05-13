@@ -3,13 +3,62 @@
 import os
 from comet_ml import Experiment
 import torch
-import librosa
+import xml.etree.ElementTree as ET
+import math
+import os
 import torch.utils.data as data
 import torch.optim as optim
 import torchaudio
 import numpy as np
 from utils import TextTransform
 from nn import *
+from decimal import localcontext, Decimal, ROUND_HALF_UP
+
+
+root_path = "/home/mohammed/Downloads/Compressed/train/"
+waves_path = root_path + "wav/"
+xml_path = root_path + "xml/utf8/"
+SAMPLE_RATE = 16000
+
+
+
+
+def parse_xml(file_name):
+    phrases = []
+    root = ET.parse(xml_path + file_name).getroot()
+
+    for segment in root.findall(".//segment"):
+        uetterance = ""
+
+        for element in segment.findall(".//element"):
+            uetterance+=(element.text + " ")
+
+        phrase = phrase[:-1]
+        with localcontext() as ctx:
+            ctx.rounding = ROUND_HALF_UP
+            offset_frame = SAMPLE_RATE * (Decimal(segment.get("starttime")).to_integral_value())
+            nums_frame = SAMPLE_RATE * (Decimal(segment.get("endtime")).to_integral_value()) - offset_frame
+
+        phrases.append({"offset_frame": int(offset_frame) , "nums_frame": int(nums_frame) ,
+                        "uetterance": uetterance})
+    return  phrases
+
+
+def construct_dataset():
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def avg_wer(wer_scores, combined_ref_len):
@@ -202,6 +251,7 @@ def data_processing(data, data_type="train"):
     input_lengths = []
     label_lengths = []
     for (waveform, _, utterance, _, _, _) in data:
+
         if data_type == 'train':
             spec = train_audio_transforms(waveform).squeeze(0).transpose(0, 1)
         elif data_type == 'valid':
@@ -420,6 +470,8 @@ def main(learning_rate=5e-4, batch_size=20, epochs=10,
 If you have a comet account, fill in teh api key, project name and experiment name below. You can create an account at [comet.ml](comet.ml).
 """
 
+
+"""
 comet_api_key = "LU4mCoRzyo2sDBDENgWPAfz6s"
 project_name = "Spereco"
 experiment_name = ""
@@ -441,3 +493,7 @@ libri_test_set = "test-clean"
 main(learning_rate, batch_size, epochs, libri_train_set, libri_test_set, experiment)
 
 experiment.end()
+"""
+
+
+
