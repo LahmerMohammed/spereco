@@ -3,7 +3,6 @@ from datasets import load_dataset, load_metric
 from datasets import ClassLabel
 import random
 import pandas as pd
-from IPython.display import display, HTML
 import re
 import pandas as pd
 from datasets import Dataset
@@ -32,14 +31,9 @@ chars_to_ignore_regex = '[\,\.\!\-\;\:\"\“\%\‘\”\�\;\—\؛\_\'ْ\،\'ُ
 
 
 def preporcess_text(dataset):
-    global no_drop_rows
+   
     df = dataset.to_pandas()
-
-    df = df.drop(df.index[no_drop_rows:])
-
-    #test
-    no_drop_rows = 400
-
+   
     for idx , row in df.iterrows():
 
         df.at[idx,'sentence'] = normalize(row["sentence"]) 
@@ -49,8 +43,6 @@ def preporcess_text(dataset):
                 df.drop(idx,inplace=True)
                 break
     
-    print(df.shape)
-
     return Dataset.from_pandas(df)
 
 
@@ -98,12 +90,13 @@ def prepare_dataset(batch):
 
 def compute_metrics(pred):
     pred_logits = pred.predictions
+    
     pred_ids = np.argmax(pred_logits, axis=-1)
 
     pred.label_ids[pred.label_ids == -100] = processor.tokenizer.pad_token_id
 
     pred_str = processor.batch_decode(pred_ids)
-    # we do not want to group tokens when computing the metrics
+
     label_str = processor.batch_decode(pred.label_ids, group_tokens=False)
 
     wer = wer_metric.compute(predictions=pred_str, references=label_str)
