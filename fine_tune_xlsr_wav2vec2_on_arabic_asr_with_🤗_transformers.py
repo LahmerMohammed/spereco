@@ -90,7 +90,7 @@ def prepare_dataset(batch):
 
 def compute_metrics(pred):
     pred_logits = pred.predictions
-    
+
     pred_ids = np.argmax(pred_logits, axis=-1)
 
     pred.label_ids[pred.label_ids == -100] = processor.tokenizer.pad_token_id
@@ -168,8 +168,8 @@ class DataCollatorCTCWithPadding:
 
 if __name__ == "__main__":
 
-    drive.mount('/content/gdrive/')
-    out_dir = "/content/gdrive/MyDrive/wav2vec2-large-xlsr-arabic-demo-v2"
+    #drive.mount('/content/gdrive/')
+    out_dir = "/content/gdrive/MyDrive/wav2vec2-large-xlsr-arabic-demo-v5"
 
 
     # load dataset
