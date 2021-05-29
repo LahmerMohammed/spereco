@@ -1,0 +1,7 @@
+pip install datasets==1.4.1
+pip install transformers==4.4.0
+pip install torchaudio
+pip install librosa
+pip install jiwer
+pip install lang-trans
+ 
