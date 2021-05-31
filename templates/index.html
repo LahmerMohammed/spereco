@@ -1,0 +1,71 @@
+<!doctype html> <html> <head>
+    <title>Arabic Speech Recognition!</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"/>
+    <style>
+        html, body {
+            background-color: black;
+        }
+        #maintext {
+            position:absolute;
+            margin:auto;
+            width:1500px;
+            height:200px;
+            text-align:center;
+            top:0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        h1 {
+            font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
+            font-size: 50px;
+            color: white;
+        }
+        #recorder {
+            width: 85%;
+            height: 50px;
+        }
+        #button {
+            width: 10%;
+            height: 50px;
+        }
+        #player {
+            width: 100%;
+        }
+        #label {
+            color: white;
+            width: 100%;
+            font-weight: bold;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            font-size: 50px;
+        }
+    </style>
+   </head>
+   <body>
+      <div id="maintext">
+         <h1 class="text-light mb-2"> Arabic Automatique Speech Recognition! </h1>
+         <form method="post" enctype="multipart/form-data">
+           <p class="text-light">
+              <input type="file" name="file" accept="audio/*" capture id="recorder">
+               <button id="button" type="submit">
+                   Recognize
+               </button>
+              <label for="player" id="label">
+                 Your audio file if you wanna hear it
+              </label>
+              <audio id="player" controls download></audio>
+            </p>
+         </form>
+      </div>
+      <script>
+         const recorder = document.getElementById('recorder');
+         const player = document.getElementById('player');
+         recorder.addEventListener('change', function(e) {
+         const file = e.target.files[0];
+         const url = URL.createObjectURL(file);
+         player.src = url;
+         });
+      </script>
+   </body>
+</html>
