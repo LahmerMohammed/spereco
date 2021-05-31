@@ -1,0 +1,51 @@
+<!doctype html> <html> <head>
+    <title>Arabic Speech Recognition!</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"/>
+    <style>
+        html, body {
+            background-color: black;
+        }
+        #maintext {
+            position:absolute;
+            margin:auto;
+            width:1500px;
+            height:200px;
+            text-align:center;
+            top:0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        p {
+            font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
+            font-size: 50px;
+            color: white;
+        }
+        h1, h2 {
+            font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
+            font-size: 50px;
+            color: white;
+        }
+        
+        #button {
+            width: 10%;
+            height: 50px;
+        }
+    </style>
+   </head>
+   <body>
+      <div id="maintext">
+         <h1 class="text-light mb-2"> Arabic Automatique Speech Recognition! </h1>
+         <h2 class="text-light mb-2"> The model Gave This Prediction : </h2>
+         <p class="text-light">
+              {{Prediction}}
+         </p>
+         <a href="{{ url_for('main_page') }}">
+            <button class="button mt-3">
+               Try again?
+            </button>
+         </a>
+      </div>
+   </body>
+</html>
