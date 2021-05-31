@@ -1,4 +1,3 @@
-
 from datasets import load_dataset, load_metric
 from datasets import ClassLabel
 import random
@@ -8,7 +7,7 @@ import pandas as pd
 from datasets import Dataset
 from lang_trans.arabic import buckwalter
 import json
-from google.colab import drive
+#from google.colab import drive
 from transformers import Wav2Vec2Processor
 from transformers import Wav2Vec2CTCTokenizer
 from transformers import Wav2Vec2FeatureExtractor
@@ -29,11 +28,17 @@ from transformers import Trainer
 chars_to_delete = ['t','☭','ۖ', 'e','g','چ','ڨ']
 chars_to_ignore_regex = '[\,\.\!\-\;\:\"\“\%\‘\”\�\;\—\؛\_\'ْ\،\'ُ\؟\ـ\?\'ۚ\'ٌ\'َ\'ّ\'ۖ\»\«]'
 
-
+no_rows_drop  = 4000
 def preporcess_text(dataset):
-   
+    
+    global no_rows_drop
+
     df = dataset.to_pandas()
    
+    df = df.drop(df.index[no_rows_drop:])
+
+    no_rows_drop = 1000
+
     for idx , row in df.iterrows():
 
         df.at[idx,'sentence'] = normalize(row["sentence"]) 
@@ -101,6 +106,7 @@ def compute_metrics(pred):
 
     wer = wer_metric.compute(predictions=pred_str, references=label_str)
 
+
     return {"wer": wer}
 
 @dataclass
@@ -166,11 +172,59 @@ class DataCollatorCTCWithPadding:
         return batch
 
 
+chars_to_ignore_regex = '[\,\.\!\-\;\:\"\“\%\‘\”\�\;\—\؛\_\'ْ\،\'ُ\؟\ـ\?\'ۚ\'ٌ\'َ\'ّ\'ۖ\»\«]'
+
+
+
+arabic_diacritics = re.compile("""
+                             ّ    | # Tashdid
+                             َ    | # Fatha
+                             ً    | # Tanwin Fath
+                             ُ    | # Damma
+                             ٌ    | # Tanwin Damm
+                             ِ    | # Kasra
+                             ٍ    | # Tanwin Kasr
+                             ْ    | # Sukun
+                             ـ     # Tatwil/Kashida
+                         """, re.VERBOSE)
+
+
+
+
+def normalize_arabic(text):
+    text = re.sub("[إأﺃآا]", "ا", text)
+    text = re.sub("ى", "ي", text)
+    text = re.sub("ؤ", "ء", text)
+    text = re.sub("ئ", "ء", text)
+    text = re.sub("ة", "ه", text)
+    text = re.sub("گ", "ك", text)
+    text = re.sub("ک", "ك", text)
+    text = re.sub("ھ", "ه", text)
+    text = re.sub("ی", "ي", text)
+    return text
+
+
+def remove_diacritics(text):
+    text = re.sub(arabic_diacritics, '', text)
+    text = re.sub(chars_to_ignore_regex,'',text)
+    return text
+
+def normalize(text):
+    text = remove_diacritics(text)
+    text = normalize_arabic(text)
+    return text
+
+
+
+
+
 if __name__ == "__main__":
 
     #drive.mount('/content/gdrive/')
-    out_dir = "/content/gdrive/MyDrive/wav2vec2-large-xlsr-arabic-demo-v5"
+    #out_dir = "/content/gdrive/MyDrive/wav2vec2-large-xlsr-arabic-demo-v5"
 
+
+    out_dir = "/home/mohammed/spereco/model"
 
     # load dataset
     common_voice_train = load_dataset("common_voice", "ar", split="train")
@@ -182,8 +236,18 @@ if __name__ == "__main__":
     common_voice_test = common_voice_test.remove_columns(columns_to_remove)
 
     # normalize arabic text
+    
+    print("train shape : " + str(common_voice_train.to_pandas().shape))
+    print("test shape : " + str(common_voice_test.to_pandas().shape))
+
+
+
     common_voice_train = preporcess_text(common_voice_train)
     common_voice_test = preporcess_text(common_voice_test)
+
+    
+    print("train shape : " + str(common_voice_train.to_pandas().shape))
+    print("test shape : " + str(common_voice_test.to_pandas().shape))
 
 
 
@@ -214,7 +278,7 @@ if __name__ == "__main__":
     feature_extractor = Wav2Vec2FeatureExtractor(feature_size=1, sampling_rate=16000,
     padding_value=0.0, do_normalize=True, return_attention_mask=True)
 
-
+    wer_metric = load_metric("wer")
     processor = Wav2Vec2Processor(feature_extractor=feature_extractor, tokenizer=tokenizer)
     processor.save_pretrained(out_dir)
 
@@ -266,13 +330,27 @@ if __name__ == "__main__":
         gradient_accumulation_steps=2,
         evaluation_strategy="steps",
         num_train_epochs=30,
-        fp16=True,
-        save_steps=400,
-        eval_steps=400,
+        fp16=False,
+        save_steps=5000,
+        eval_steps=500,
         logging_steps=400,
         learning_rate=3e-4,
         warmup_steps=500,
-        save_total_limit=2,
+        save_total_limit=1,
+    )
+    
+    trainer = Trainer(
+        model=model,
+        data_collator=data_collator,
+        args=training_args,
+        compute_metrics=compute_metrics,
+        train_dataset=common_voice_train,
+        eval_dataset=common_voice_test,
+        tokenizer=processor.feature_extractor,
     )
 
+
     trainer.train()
+
+
+    trainer.save_model(out_dir)
