@@ -7,6 +7,8 @@ import os
 
 app = Flask(__name__)
 
+# make sur to adjust the path to your computer
+
 where_to_save_files = "/home/aymenha2021/PycharmProjects/flaskProject1/uploads"
 tokenizer = Wav2Vec2Tokenizer.from_pretrained(
     "/home/aymenha2021/PycharmProjects/flaskProject/wav2vec2-large-xlsr-arabic")
