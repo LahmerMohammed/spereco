@@ -42,4 +42,4 @@ def prediction(filename):
     return render_template('predict.html', Prediction=Prediction)
 
 
-app.run(host='0.0.0.0', port=80)
+app.run()
